@@ -69,8 +69,9 @@ unless RUBY_PLATFORM =~ /java/
 end
 
 if RUBY_PLATFORM =~ /java/ 
-  def hash_from_xml_using_jdom_document_builder
-    puts "no implemented ..."
+  def hash_from_xml_using_jdom
+    XmlMini.backend = "JDOM"
+    Hash.from_xml(@wg_32937_77360)
   end
 end
 
@@ -99,6 +100,7 @@ test_iterations.times do
     x.report("rexml") { n.times {hash_from_xml_using_rexml} }
     x.report("libxml") { n.times {hash_from_xml_using_libxml} }  unless RUBY_PLATFORM =~ /java/ 
     x.report("nokogiri") { n.times {hash_from_xml_using_nokogiri} }  unless RUBY_PLATFORM =~ /java/ 
+    x.report("jdom") { n.times {hash_from_xml_using_jdom} }  if RUBY_PLATFORM =~ /java/ 
   end
   puts
 end
