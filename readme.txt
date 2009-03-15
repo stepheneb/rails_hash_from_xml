@@ -3,6 +3,11 @@ the new XmlMini.backend capability to choose REXML (default) Nokogiri, or libxml
 
 summary: libxml-ruby was 25x faster than REXML while nokogiri was only 1.6 times faster
 
+New XmlMini.backend capability described here:
+
+  Alternative XML parsers support in ActiveSupport for ActiveResource
+  http://rails.lighthouseapp.com/projects/8994/tickets/2084-alternative-xml-parsers-support-in-activesupport-for-activeresource
+
 The results below were collected using this Rails commit:
 
   Sat Mar 14 10:42:02 2009 -0500
