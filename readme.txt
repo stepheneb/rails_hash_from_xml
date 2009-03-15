@@ -1,8 +1,29 @@
 Benchmarking Hash.from_xml with a 1.7 MB xml file in edge Rails 2.3.1 using 
-the new XmlMini.backend capability to choose REXML (default) Nokogiri, or libxml-ruby.
+the new XmlMini.backend capability to choose REXML (default) Nokogiri, libxml-ruby.
+
+Note: I've added a new JDOM backend see this Rails lighthouse ticket:
+
+  Add JDOM (JRuby) as XmlMini backend
+  http://rails.lighthouseapp.com/projects/8994-ruby-on-rails/tickets/2238-add-jdom-jruby-as-xmlmini-backend
+
+
+jruby 1.3.0 (ruby 1.8.6 patchlevel 287) (2009-03-13 rev 6586)
+[amd64-java], platform: Java, version 1.6.0_03-p3
+----------------------------------------------------------------
+  rexml      3.84
+  jdom       1.25
+
+Ruby version: MRI 1.8.6 (2008-03-03 rev 114), 
+platform: universal-darwin9.0
+-----------------------------------------------------------------
+  rexml     13.079
+  libxml     0.489
+  nokogiri   7.954
+
 
 summary: libxml-ruby was 25x faster than REXML while nokogiri was only 1.6 times 
-faster while JRuby ran the REXML backend 3 times faster than MRI 1.8.6.
+faster while JRuby ran the REXML backend 3 times faster than MRI 1.8.6 and the 
+JDOM backend 10 times faster.
 
 New XmlMini.backend capability described here:
 
