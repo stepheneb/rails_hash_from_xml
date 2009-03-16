@@ -4,6 +4,8 @@
 #
 # To run in Ruby using rails source:
 #
+# set RAILS_SOURCE to point to the rails source:
+#
 #   export RAILS_SOURCE=/Users/stephen/dev/ruby/src/gems/rails.git
 #   ruby -I$RAILS_SOURCE/activesupport/lib bench_hash_from_xml.rb
 #
@@ -49,7 +51,7 @@ end
 # ohai.all_plugins
 # @platform_info = "#{ohai.platform}: #{ohai.platform_version}"
 
-@wg_32937_77360 = File.read("77360.otml")
+@wg_32937_77360 = File.read("xml/77360.otml")
 
 def hash_from_xml_using_rexml
   XmlMini.backend = "REXML"

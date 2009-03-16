@@ -1,0 +1,8 @@
+<collection>
+  <list>
+    <object id="123" />
+    <object id="456" />
+    <definition word="Evaporation" definition="Evaporation is the process of changing from a liquid to a gas, for example, water changing from a liquid into water vapor." />
+    <definition word="Condensation" definition="Condensation is the process of changing from a gas to a liquid, for example, water changing from water vapor into a liquid." />
+  </list>
+</collection>

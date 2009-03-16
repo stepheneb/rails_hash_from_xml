@@ -1,0 +1,8 @@
+<OTDefinitionManager>
+  <definitions>
+    <object refid="b6350a20-e3b4-11dc-95ff-0800200c9a66/definitions[0]" />
+    <object refid="b6350a20-e3b4-11dc-95ff-0800200c9a66/definitions[1]" />
+    <OTDefinition word="Evaporation" definition="&lt;b&gt;Evaporation&lt;/b&gt; is the process of changing from a liquid to a gas, for example, water changing from a liquid into water vapor." shownCount="4" studentDefinition="It is water that is changing from a liquid into a gas." />
+    <OTDefinition word="Condensation" definition="&lt;b&gt;Condensation&lt;/b&gt; is the process of changing from a gas to a liquid, for example, water changing from water vapor into a liquid." shownCount="1" studentDefinition="it is the process in which a gas chages into a liquid." />
+  </definitions>
+</OTDefinitionManager>
