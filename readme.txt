@@ -59,9 +59,15 @@ rexml     12.130000   0.130000  12.260000 ( 12.649212)
 libxml     0.470000   0.010000   0.480000 (  0.493954)
 nokogiri   7.320000   0.080000   7.400000 (  7.781733)
 
-[rails_hash_from_xml]$ jruby -J-server -I$RAILS_SOURCE/activesupport/lib bench_hash_from_xml.rb
 
-jruby 1.3.0 (ruby 1.8.6 patchlevel 287) (2009-03-13 rev 6586) [i386-java], platform: Java, version 1.5.0_16
+[rails_hash_from_xml (master)]$ java -version
+java version "1.5.0_16"
+Java(TM) 2 Runtime Environment, Standard Edition (build 1.5.0_16-b06-284)
+Java HotSpot(TM) Client VM (build 1.5.0_16-133, mixed mode, sharing)
+
+[rails_hash_from_xml (master)]$ jruby -I$RAILS_SOURCE/activesupport/lib bench_hash_from_xml.rb
+
+jruby 1.3.0 (ruby 1.8.6p287) (2009-03-16 r6586) (Java HotSpot(TM) Client VM 1.5.0_16) [i386-java], platform: Java, version 1.5.0_16
 
 1 times: Run Rails Hash.from_xml conversion on 1.8 MB XML document.
 
@@ -69,38 +75,69 @@ Using Rails ActiveSupport::XmlMini backends: REXML
 running benchmark once.
 
 Rehearsal -----------------------------------------
-rexml   8.348000   0.000000   8.348000 (  8.348000)
--------------------------------- total: 8.348000sec
+rexml   6.259000   0.000000   6.259000 (  6.259000)
+jdom    2.356000   0.000000   2.356000 (  2.356000)
+-------------------------------- total: 8.615000sec
 
             user     system      total        real
-rexml   4.852000   0.000000   4.852000 (  4.853000)
+rexml   4.788000   0.000000   4.788000 (  4.789000)
+jdom    1.878000   0.000000   1.878000 (  1.878000)
 
-[rails_hash_from_xml]$ pickjdk
+[rails_hash_from_xml (master)]$ jruby -J-server -I$RAILS_SOURCE/activesupport/lib bench_hash_from_xml.rb
+
+jruby 1.3.0 (ruby 1.8.6p287) (2009-03-16 r6586) (Java HotSpot(TM) Server VM 1.5.0_16) [i386-java], platform: Java, version 1.5.0_16
+
+1 times: Run Rails Hash.from_xml conversion on 1.8 MB XML document.
+
+Using Rails ActiveSupport::XmlMini backends: REXML
+running benchmark once.
+
+Rehearsal -----------------------------------------
+rexml   8.236000   0.000000   8.236000 (  8.236000)
+jdom    4.277000   0.000000   4.277000 (  4.277000)
+------------------------------- total: 12.513000sec
+
+            user     system      total        real
+rexml   5.068000   0.000000   5.068000 (  5.069000)
+jdom    1.293000   0.000000   1.293000 (  1.293000)
+
+[rails_hash_from_xml (master)]$ pickjdk
  1) 1.3.1
  2) 1.4.2
- 3) 1.5.0 < CURRENT
+ 3) 1.5.0
  4) 1.6.0
  5) Soylatte-amd64
  6) Soylatte16-i386-1.0.3
  7) 1.7.0
  8) None
-Choose one of the above [1-8]: 5
+Choose one of the above [1-8]: 4
 
-[rails_hash_from_xml]$ jruby -J-server -I$RAILS_SOURCE/activesupport/lib bench_hash_from_xml.rb
+[rails_hash_from_xml (master)]$ jruby -I$RAILS_SOURCE/activesupport/lib bench_hash_from_xml.rb 2
 
-jruby 1.3.0 (ruby 1.8.6 patchlevel 287) (2009-03-13 rev 6586) [amd64-java], platform: Java, version 1.6.0_03-p3
+jruby 1.3.0 (ruby 1.8.6p287) (2009-03-16 r6586) (Java HotSpot(TM) 64-Bit Server VM 1.6.0_07) [x86_64-java], platform: Java, version 1.6.0_07
 
 1 times: Run Rails Hash.from_xml conversion on 1.8 MB XML document.
 
 Using Rails ActiveSupport::XmlMini backends: REXML
-running benchmark once.
+running benchmark 3 times.
 
 Rehearsal -----------------------------------------
-rexml   8.585000   0.000000   8.585000 (  8.585000)
--------------------------------- total: 8.585000sec
+rexml   9.199000   0.000000   9.199000 (  9.199000)
+jdom    8.638000   0.000000   8.638000 (  8.638000)
+------------------------------- total: 17.837000sec
 
             user     system      total        real
-rexml   3.907000   0.000000   3.907000 (  3.907000)
+rexml   3.629000   0.000000   3.629000 (  3.629000)
+jdom    1.169000   0.000000   1.169000 (  1.169000)
+
+Rehearsal -----------------------------------------
+rexml   3.815000   0.000000   3.815000 (  3.814000)
+jdom    2.028000   0.000000   2.028000 (  2.028000)
+-------------------------------- total: 5.843000sec
+
+            user     system      total        real
+rexml   3.316000   0.000000   3.316000 (  3.315000)
+jdom    1.073000   0.000000   1.073000 (  1.073000)
 
 ---------------------------------------------------------------------------------------
 
