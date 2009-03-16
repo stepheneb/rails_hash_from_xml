@@ -32,20 +32,21 @@ class TestImplementationEquality < Test::Unit::TestCase
   include ActiveSupport
 
   XmlMini.backend = "REXML"
-  # WG_32937_77360_XML  = File.read(
-  #   File.join(File.dirname(__FILE__), '..', 'xml', "77360.otml")
-  # )
-  # REXML_HASH      = Hash.from_xml(WG_32937_77360)
+  WG_32937_77360_XML  = File.read(
+    File.join(File.dirname(__FILE__), '..', 'xml', "77360.otml")
+  )
+  REXML_BIG_HASH = Hash.from_xml(WG_32937_77360_XML)
 
   COLLECTION_XML  = File.read(
     File.join(File.dirname(__FILE__), '..', 'xml', "collection.xml")
   )
-  REXML_HASH      = Hash.from_xml(COLLECTION_XML)
+  REXML_HASH = Hash.from_xml(COLLECTION_XML)
 
   if XML_MINI_BACKENDS.find {|b| b == 'Nokogiri'}
     def test_nokogiri_equals_rexml
       XmlMini.backend = "Nokogiri"
       assert_equal(REXML_HASH, Hash.from_xml(COLLECTION_XML))
+      assert_equal(REXML_BIG_HASH, Hash.from_xml(WG_32937_77360_XML))
     end
   end
 
@@ -53,6 +54,7 @@ class TestImplementationEquality < Test::Unit::TestCase
     def test_libxml_equals_rexml
       XmlMini.backend = "LibXML"
       assert_equal(REXML_HASH, Hash.from_xml(COLLECTION_XML))
+      assert_equal(REXML_BIG_HASH, Hash.from_xml(WG_32937_77360_XML))
     end
   end
 
@@ -60,6 +62,7 @@ class TestImplementationEquality < Test::Unit::TestCase
     def test_jdom_equals_rexml
       XmlMini.backend = "JDOM"
       assert_equal(REXML_HASH, Hash.from_xml(COLLECTION_XML))
+      assert_equal(REXML_BIG_HASH, Hash.from_xml(WG_32937_77360_XML))
     end
   end
 
