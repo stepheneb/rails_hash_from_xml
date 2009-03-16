@@ -108,27 +108,36 @@ Testing the equivalence of the alternate backends to REXML:
 
 JRuby JDOM backend
 
-$ jruby -I$RAILS_SOURCE/activesupport/lib test/test_implementation_equality.rb
+[rails_hash_from_xml (master)]$ jruby -I$RAILS_SOURCE/activesupport/lib test/test_rexml_equality.rb 
 Testing xml_mini backends: JDOM
-Loaded suite test/test_implementation_equality
+Loaded suite test/test_rexml_equality
 Started
-.
-Finished in 0.246 seconds.
+..........
+Finished in 0.547 seconds.
 
-1 tests, 1 assertions, 0 failures, 0 errors
+10 tests, 10 assertions, 0 failures, 0 errors
 
 
 Nokogiri and libxml-ruby:
 
-[rails_hash_from_xml (master)]$ ruby -I$RAILS_SOURCE/activesupport/lib test/test_implementation_equality.rb 
+[rails_hash_from_xml (master)]$ ruby -I$RAILS_SOURCE/activesupport/lib test/test_rexml_equality.rb 
 Testing xml_mini backends: Nokogiri LibXML
-Loaded suite test/test_implementation_equality
+Loaded suite test/test_rexml_equality
 Started
-F.
-Finished in 0.097587 seconds.
+....F.............F.
+Finished in 0.165816 seconds.
 
   1) Failure:
-test_libxml_equals_rexml(TestImplementationEquality) [test/test_implementation_equality.rb:55]:
+test_children_with_non_adjacent_comparing_LibXML_to_rexml(TestRexmlEquality) [test/test_rexml_equality.rb:151]:
+<{"root"=>
+  {"__content__"=>"\n    good\n    \n    morning\n  ",
+   "products"=>{"__content__"=>"\n      hello everyone\n    "}}}> expected but was
+<{"root"=>
+  {"__content__"=>"\n    morning\n  ",
+   "products"=>{"__content__"=>"\n      hello everyone\n    "}}}>.
+
+  2) Failure:
+test_two_lists_in_a_collection_comparing_LibXML_to_rexml(TestRexmlEquality) [test/test_rexml_equality.rb:151]:
 <{"collection"=>
   {"list"=>
     {"definition"=>
@@ -151,4 +160,5 @@ test_libxml_equals_rexml(TestImplementationEquality) [test/test_implementation_e
         "definition"=>
          "Condensation is the process of changing from a gas to a liquid, for example, water changing from water vapor into a liquid."}]}}}>.
 
-2 tests, 2 assertions, 1 failures, 0 errors
+20 tests, 20 assertions, 2 failures, 0 errors
+[rails_hash_from_xml (master)]$
