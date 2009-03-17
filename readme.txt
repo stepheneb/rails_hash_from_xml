@@ -143,6 +143,10 @@ jdom    1.073000   0.000000   1.073000 (  1.073000)
 
 Testing the equivalence of the alternate backends to REXML:
 
+Also See Rails ticket:
+
+http://rails.lighthouseapp.com/projects/8994-ruby-on-rails/tickets/2258-libxml-xml_mini-backend-producing-incorrect-hashes#ticket-2258-2
+
 JRuby JDOM backend
 
 [rails_hash_from_xml (master)]$ jruby -I$RAILS_SOURCE/activesupport/lib test/test_rexml_equality.rb 

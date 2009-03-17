@@ -136,13 +136,12 @@ class TestRexmlEquality < Test::Unit::TestCase
   </collection>
   eoxml
   })
-  
+
   FROM_XML_TESTS = from_xml_tests
-  
-  from_xml_tests.each do |name, xml|
-    XML_MINI_BACKENDS.each do |backend|
-      test_name = "test_#{name}_comparing_#{backend}_to_rexml"
-      define_method test_name.to_sym do
+
+  XML_MINI_BACKENDS.each do |backend|
+    from_xml_tests.each do |name, xml|
+      define_method "test_#{name}_comparing_#{backend.downcase}_to_rexml".to_sym do
         input_xml = <<-eoxml
         #{xml}
         eoxml
@@ -151,5 +150,29 @@ class TestRexmlEquality < Test::Unit::TestCase
         assert_equal(rexml_hash, alternate_hash)
       end
     end
+
+    define_method "test_setting_#{backend.downcase}_as_backend".to_sym do
+      XmlMini.backend = backend
+      assert_equal ActiveSupport.const_get("XmlMini_#{backend}"), XmlMini.backend
+    end
+
+    define_method "test_#{backend.downcase}_blank_returns_empty_hash".to_sym do
+      assert_equal({}, XmlMini.with_backend(backend) { XmlMini.parse(nil) } )
+      assert_equal({}, XmlMini.with_backend(backend) { XmlMini.parse('') } )
+    end
+
+    define_method "test_file_from_xml_comparing_#{backend.downcase}_to_rexml".to_sym do
+      input_xml = <<-eoxml
+      <blog>
+        <logo type="file" name="logo.png" content_type="image/png">R0lGODlhkACZAPUAAM5lcfjrtMQCG=\n</logo>
+      </blog>
+      eoxml
+      hash = XmlMini.with_backend(backend) { Hash.from_xml(input_xml) }
+      assert hash.has_key?('blog')
+      assert hash['blog'].has_key?('logo')
+      file = hash['blog']['logo']
+      assert_equal 'logo.png', file.original_filename
+      assert_equal 'image/png', file.content_type
+    end    
   end
 end
