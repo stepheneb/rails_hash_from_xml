@@ -1,13 +1,25 @@
+require 'rubygems'
 require 'test/unit'
-require 'activesupport'
+require 'i18n'
+require 'active_support'
+require 'active_support/core_ext/hash/conversions'
 require 'active_support/xml_mini'
+require 'active_support/version'
+
+require 'java' if JRUBY = (RUBY_PLATFORM =~ /java/)
 
 xml_mini_backends = []
 
-# The JDOM JRuby backendw will only work with this patch applied to rails: 
-#   http://rails.lighthouseapp.com/projects/8994/tickets/2238-add-jdom-jruby-as-xmlmini-backend
 if RUBY_PLATFORM =~ /java/
   xml_mini_backends << 'JDOM'
+  
+  # begin
+  #   gem 'nokogiri', '>= 1.1.1'
+  #   xml_mini_backends << 'Nokogiri'
+  # rescue Gem::LoadError
+  #   # Skip nokogiri tests
+  # end
+  
 else
   begin
     gem 'nokogiri', '>= 1.1.1'
@@ -26,7 +38,11 @@ end
 
 XML_MINI_BACKENDS = xml_mini_backends
 
-puts "Testing xml_mini backends: #{XML_MINI_BACKENDS.join(' ')}"
+puts "\nTesting xml_mini backends: #{XML_MINI_BACKENDS.join(', ')} on ActiveSupport version #{ActiveSupport::VERSION::STRING}\n\n"
+
+if JRUBY && XML_MINI_BACKENDS.any? { |b| b == 'Nokogiri' }
+  JRuby.objectspace = true
+end
 
 class TestRexmlEquality < Test::Unit::TestCase
   include ActiveSupport
