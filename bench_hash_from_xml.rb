@@ -101,7 +101,7 @@ test_iterations = 1 unless test_iterations > 1
 puts 
 puts "Running in #{@ruby_info}"
 puts
-puts "Testing xml_mini backends: #{XML_MINI_BACKENDS.join(', ')} on ActiveSupport version #{ActiveSupport::VERSION::STRING}"
+puts "Benchmarking xml_mini backends: #{XML_MINI_BACKENDS.join(', ')} on ActiveSupport version #{ActiveSupport::VERSION::STRING}"
 puts "running Rails Hash.from_xml conversion on 1.7 MB XML document."
 puts
 print "Running benchmark "
