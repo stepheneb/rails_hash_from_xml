@@ -11,8 +11,11 @@
 #
 require 'rubygems'
 require 'benchmark'
-require 'activesupport'
+require 'i18n'
+require 'active_support'
+require 'active_support/core_ext/hash/conversions'
 require 'active_support/xml_mini'
+require 'active_support/version'
 include ActiveSupport
 
 # This monkeypatch to String adds support for "Nan".to_f => NaN
@@ -29,21 +32,49 @@ class String
   end 
 end
 
-if RUBY_PLATFORM =~ /java/
-    require 'jruby'
-    include Java 
-    import javax.xml.parsers.DocumentBuilder
-    import javax.xml.parsers.DocumentBuilderFactory
-    @dbf = DocumentBuilderFactory.new_instance
-    @ruby_info = JRuby.runtime.instance_config.version_string.strip
-    @ruby_info << ", platform: Java, version #{java.lang.System.getProperty('java.version')}"
-  else
+JRUBY = (RUBY_PLATFORM =~ /java/)
+
+xml_mini_backends = ["REXML"]
+
+if JRUBY
+  require 'java'
+  include Java
+  xml_mini_backends << 'JDOM'
+  begin
     gem 'nokogiri', '>= 1.1.1'
-    gem 'libxml-ruby', '>= 1.1.2'
     require 'nokogiri'
+    xml_mini_backends << 'Nokogiri'
+  rescue Gem::LoadError
+    # Skip nokogiri tests
+  end
+else
+  begin
+    gem 'nokogiri', '>= 1.1.1'
+    require 'nokogiri'
+    xml_mini_backends << 'Nokogiri'
+  rescue Gem::LoadError, LoadError
+    # Skip nokogiri tests
+  end  
+  begin
+    gem 'libxml-ruby', '>= 1.1.2'
     require 'libxml'
-    @ruby_info = "Ruby version: MRI #{RUBY_VERSION} (#{RUBY_RELEASE_DATE} rev #{RUBY_PATCHLEVEL})"
-    @ruby_info << ", platform: #{RUBY_PLATFORM}"
+    xml_mini_backends << 'LibXML'
+  rescue Gem::LoadError
+    # Skip libxml-ruby tests
+  end
+end
+
+XML_MINI_BACKENDS = xml_mini_backends
+
+if JRUBY
+  java_import javax.xml.parsers.DocumentBuilder
+  java_import javax.xml.parsers.DocumentBuilderFactory
+  @dbf = DocumentBuilderFactory.new_instance
+  @ruby_info = JRuby.runtime.instance_config.version_string.strip
+  @ruby_info << ", platform: Java, version #{java.lang.System.getProperty('java.version')}"
+else
+  @ruby_info = "Ruby version: MRI #{RUBY_VERSION} (#{RUBY_RELEASE_DATE} rev #{RUBY_PATCHLEVEL})"
+  @ruby_info << ", platform: #{RUBY_PLATFORM}"
 end
 
 # require 'ohai'
@@ -53,56 +84,38 @@ end
 
 @wg_32937_77360 = File.read("xml/77360.otml")
 
-def hash_from_xml_using_rexml
-  XmlMini.backend = "REXML"
+def hash_from_xml_using(backend)
+  if JRUBY && backend == 'Nokogiri'
+    objectspace_state = JRuby.objectspace
+    JRuby.objectspace = true
+  end
+  XmlMini.backend = backend
   Hash.from_xml(@wg_32937_77360)
-end
-
-unless RUBY_PLATFORM =~ /java/ 
-  def hash_from_xml_using_nokogiri
-    XmlMini.backend = "Nokogiri"
-    Hash.from_xml(@wg_32937_77360)
-  end
-
-  def hash_from_xml_using_libxml
-    XmlMini.backend = "LibXML"
-    Hash.from_xml(@wg_32937_77360)
+  if JRUBY && backend == 'Nokogiri'
+    JRuby.objectspace = objectspace_state
   end
 end
 
-if RUBY_PLATFORM =~ /java/ 
-  def hash_from_xml_using_jdom
-    XmlMini.backend = "JDOM"
-    Hash.from_xml(@wg_32937_77360)
-  end
-end
-
-n = 1
 test_iterations = ARGV.first.to_i 
 test_iterations = 1 unless test_iterations > 1
 puts 
-puts @ruby_info
+puts "Running in #{@ruby_info}"
 puts
-puts "#{n} times: Run Rails Hash.from_xml conversion on 1.8 MB XML document."
+puts "Testing xml_mini backends: #{XML_MINI_BACKENDS.join(', ')} on ActiveSupport version #{ActiveSupport::VERSION::STRING}"
+puts "running Rails Hash.from_xml conversion on 1.7 MB XML document."
 puts
-print "Using Rails ActiveSupport::XmlMini backends: REXML"
-unless RUBY_PLATFORM =~ /java/ 
-  puts ", Nokogiri #{Nokogiri::VERSION}, libxml-ruby 1.1.2"
-else
-  puts
-end
-print "running benchmark "
+print "Running benchmark "
 if test_iterations == 1 
-  puts "once.\n\n"
+  puts "once with rehearsal.\n\n"
 else
-  puts "#{test_iterations} times.\n\n"
+  puts "#{test_iterations} times with rehearsals.\n\n"
 end
+
 test_iterations.times do
   Benchmark.bmbm do |x|
-    x.report("rexml") { n.times {hash_from_xml_using_rexml} }
-    x.report("libxml") { n.times {hash_from_xml_using_libxml} }  unless RUBY_PLATFORM =~ /java/ 
-    x.report("nokogiri") { n.times {hash_from_xml_using_nokogiri} }  unless RUBY_PLATFORM =~ /java/ 
-    x.report("jdom") { n.times {hash_from_xml_using_jdom} }  if RUBY_PLATFORM =~ /java/ 
+    XML_MINI_BACKENDS.each do |backend|
+      x.report(backend.dup) { hash_from_xml_using(backend) }
+    end
   end
   puts
 end
