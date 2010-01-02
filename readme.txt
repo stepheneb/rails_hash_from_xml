@@ -1,205 +1,83 @@
-Benchmarking Hash.from_xml with a 1.7 MB xml file in edge Rails 2.3.1 using 
-the new XmlMini.backend capability to choose REXML (default) Nokogiri, libxml-ruby.
+Benchmarking ActiveSupport's Hash.from_xml with a 1.7 MB xml file using the 
+XmlMini.backend capability to choose REXML (default) Nokogiri, libxml-ruby.
 
-Note: I've added a new JDOM backend see this Rails lighthouse ticket:
+The benchmarks also run in JRuby measuring REXML, JDOM, and Nokogiri (using FFI).
 
-  Add JDOM (JRuby) as XmlMini backend
-  http://rails.lighthouseapp.com/projects/8994-ruby-on-rails/tickets/2238-add-jdom-jruby-as-xmlmini-backend
+In addition there is a test suite that compare each of the other backends to the results
+from REXML.
 
-However the liobxml backend has errors for which there aren't tests in rails.
+I've recently run the benchmarks and tests for ActiveSupport in the: Rails 3 master
+and 2-3-stable branches:
 
-See the end of this readme.
+    master:     abae712213f663b447d49e9b06001cf51e3b5811
+    2-3-stable: 37c51594b9610469173f3deee1ffdda4beb3e397
 
-jruby 1.3.0 (ruby 1.8.6 patchlevel 287) (2009-03-13 rev 6586)
-[amd64-java], platform: Java, version 1.6.0_03-p3
-----------------------------------------------------------------
-  rexml      3.84
-  jdom       1.25
+Here are the results from the Rails 3 master branch:
 
-Ruby version: MRI 1.8.6 (2008-03-03 rev 114), 
-platform: universal-darwin9.0
------------------------------------------------------------------
-  rexml     13.079
-  libxml     0.489
-  nokogiri   7.954
+    # Ruby 1.8.6 (2008-08-11 rev 287), platform: universal-darwin9.0
+    
+    $ ruby -I$RAILS_SOURCE/activesupport/lib bench_hash_from_xml.rb
+    
+                   user     system      total        real
+    REXML     10.960000   0.270000  11.230000 ( 11.464308)
+    Nokogiri   1.230000   0.020000   1.250000 (  1.256476)
+    LibXML     0.430000   0.000000   0.430000 (  0.434689)
 
+Using: JRuby 1.5.0.dev (ruby 1.8.7 patchlevel 174) (2009-12-31 5cc49c5)
+and testing on Java 1.6 and 1.7 running in server mode and reporting the final
+measurements after running the whole benchmark twice:
 
-summary: libxml-ruby was 25x faster than REXML while nokogiri was only 1.6 times 
-faster while JRuby ran the REXML backend 3 times faster than MRI 1.8.6 and the 
-JDOM backend 10 times faster.
+    $ jruby --server -I$RAILS_SOURCE/activesupport/lib bench_hash_from_xml.rb 2
 
-New XmlMini.backend capability described here:
+    # OpenJDK Server VM 1.7.0-internal:
 
-  Alternative XML parsers support in ActiveSupport for ActiveResource
-  http://rails.lighthouseapp.com/projects/8994/tickets/2084-alternative-xml-parsers-support-in-activesupport-for-activeresource
+                   user     system      total        real
+    REXML      3.448000   0.000000   3.448000 (  3.448000)
+    JDOM       0.761000   0.000000   0.761000 (  0.761000)
+    Nokogiri   6.083000   0.000000   6.083000 (  6.082000)
 
-The results below were collected using this Rails commit:
+    # Java HotSpot(TM) 64-Bit Server VM 1.6.0_17:
 
-  Sat Mar 14 10:42:02 2009 -0500
-  http://github.com/rails/rails/commit/7706b57034e91820cf83445aede57c54ab66ac2d
+                   user     system      total        real
+    REXML      4.543000   0.000000   4.543000 (  4.543000)
+    JDOM       1.033000   0.000000   1.033000 (  1.033000)
+    Nokogiri   6.788000   0.000000   6.788000 (  6.788000)
 
-[rails_hash_from_xml]$ export RAILS_SOURCE=/Users/stephen/dev/ruby/src/gems/rails.git
-[rails_hash_from_xml]$ ruby -I$RAILS_SOURCE/activesupport/lib bench_hash_from_xml.rb
+Running a test suite I adapted that compares multiple backends to REXML:
 
-Ruby version: MRI 1.8.6 (2008-03-03 rev 114), platform: universal-darwin9.0
+MRI 1.8.6
+    
+    $ ruby -I$RAILS_SOURCE/activesupport/lib test/test_rexml_equality.rb
+    Testing xml_mini backends: Nokogiri, LibXML on ActiveSupport version 3.0.pre
+    Loaded suite test/test_rexml_equality
+    Started
+    ..........................
+    Finished in 0.123952 seconds.
 
-1 times: Run Rails Hash.from_xml conversion on 1.8 MB XML document.
+    26 tests, 34 assertions, 0 failures, 0 errors
 
-Using Rails ActiveSupport::XmlMini backends: REXML, Nokogiri 1.2.1, libxml-ruby 1.1.2
-running benchmark once.
+JRuby:
 
-Rehearsal --------------------------------------------
-rexml     12.560000   0.170000  12.730000 ( 13.174433)
-libxml     0.540000   0.010000   0.550000 (  0.572447)
-nokogiri   7.750000   0.090000   7.840000 (  8.041351)
----------------------------------- total: 21.120000sec
+    $ jruby -I$RAILS_SOURCE/activesupport/lib test/test_rexml_equality.rb
+    Testing xml_mini backends: JDOM on ActiveSupport version 3.0.pre
+    Loaded suite test/test_rexml_equality
+    Started
+    .............
+    Finished in 1.619 seconds.
 
-               user     system      total        real
-rexml     12.130000   0.130000  12.260000 ( 12.649212)
-libxml     0.470000   0.010000   0.480000 (  0.493954)
-nokogiri   7.320000   0.080000   7.400000 (  7.781733)
+    13 tests, 17 assertions, 0 failures, 0 errors
 
+The tests also pass in the 2-3-stable branch.
 
-[rails_hash_from_xml (master)]$ java -version
-java version "1.5.0_16"
-Java(TM) 2 Runtime Environment, Standard Edition (build 1.5.0_16-b06-284)
-Java HotSpot(TM) Client VM (build 1.5.0_16-133, mixed mode, sharing)
+If you are using a Mac and want to get FFI Nokogiri installed in JRuby to use the newer
+version of the libxml2 library available with macports set the following environmental
+variable in your ~/.bash_profile or ~/.bash_rc: 
 
-[rails_hash_from_xml (master)]$ jruby -I$RAILS_SOURCE/activesupport/lib bench_hash_from_xml.rb
+    export LD_LIBRARY_PATH=/opt/local/lib
 
-jruby 1.3.0 (ruby 1.8.6p287) (2009-03-16 r6586) (Java HotSpot(TM) Client VM 1.5.0_16) [i386-java], platform: Java, version 1.5.0_16
+This is only working for me when I also use Java 1.7. Using Java 1.6 I get this warning
+from Nokogiri:
 
-1 times: Run Rails Hash.from_xml conversion on 1.8 MB XML document.
-
-Using Rails ActiveSupport::XmlMini backends: REXML
-running benchmark once.
-
-Rehearsal -----------------------------------------
-rexml   6.259000   0.000000   6.259000 (  6.259000)
-jdom    2.356000   0.000000   2.356000 (  2.356000)
--------------------------------- total: 8.615000sec
-
-            user     system      total        real
-rexml   4.788000   0.000000   4.788000 (  4.789000)
-jdom    1.878000   0.000000   1.878000 (  1.878000)
-
-[rails_hash_from_xml (master)]$ jruby -J-server -I$RAILS_SOURCE/activesupport/lib bench_hash_from_xml.rb
-
-jruby 1.3.0 (ruby 1.8.6p287) (2009-03-16 r6586) (Java HotSpot(TM) Server VM 1.5.0_16) [i386-java], platform: Java, version 1.5.0_16
-
-1 times: Run Rails Hash.from_xml conversion on 1.8 MB XML document.
-
-Using Rails ActiveSupport::XmlMini backends: REXML
-running benchmark once.
-
-Rehearsal -----------------------------------------
-rexml   8.236000   0.000000   8.236000 (  8.236000)
-jdom    4.277000   0.000000   4.277000 (  4.277000)
-------------------------------- total: 12.513000sec
-
-            user     system      total        real
-rexml   5.068000   0.000000   5.068000 (  5.069000)
-jdom    1.293000   0.000000   1.293000 (  1.293000)
-
-[rails_hash_from_xml (master)]$ pickjdk
- 1) 1.3.1
- 2) 1.4.2
- 3) 1.5.0
- 4) 1.6.0
- 5) Soylatte-amd64
- 6) Soylatte16-i386-1.0.3
- 7) 1.7.0
- 8) None
-Choose one of the above [1-8]: 4
-
-[rails_hash_from_xml (master)]$ jruby -I$RAILS_SOURCE/activesupport/lib bench_hash_from_xml.rb 2
-
-jruby 1.3.0 (ruby 1.8.6p287) (2009-03-16 r6586) (Java HotSpot(TM) 64-Bit Server VM 1.6.0_07) [x86_64-java], platform: Java, version 1.6.0_07
-
-1 times: Run Rails Hash.from_xml conversion on 1.8 MB XML document.
-
-Using Rails ActiveSupport::XmlMini backends: REXML
-running benchmark 3 times.
-
-Rehearsal -----------------------------------------
-rexml   9.199000   0.000000   9.199000 (  9.199000)
-jdom    8.638000   0.000000   8.638000 (  8.638000)
-------------------------------- total: 17.837000sec
-
-            user     system      total        real
-rexml   3.629000   0.000000   3.629000 (  3.629000)
-jdom    1.169000   0.000000   1.169000 (  1.169000)
-
-Rehearsal -----------------------------------------
-rexml   3.815000   0.000000   3.815000 (  3.814000)
-jdom    2.028000   0.000000   2.028000 (  2.028000)
--------------------------------- total: 5.843000sec
-
-            user     system      total        real
-rexml   3.316000   0.000000   3.316000 (  3.315000)
-jdom    1.073000   0.000000   1.073000 (  1.073000)
-
----------------------------------------------------------------------------------------
-
-Testing the equivalence of the alternate backends to REXML:
-
-Also See Rails ticket:
-
-http://rails.lighthouseapp.com/projects/8994-ruby-on-rails/tickets/2258-libxml-xml_mini-backend-producing-incorrect-hashes#ticket-2258-2
-
-JRuby JDOM backend
-
-[rails_hash_from_xml (master)]$ jruby -I$RAILS_SOURCE/activesupport/lib test/test_rexml_equality.rb 
-Testing xml_mini backends: JDOM
-Loaded suite test/test_rexml_equality
-Started
-..........
-Finished in 0.547 seconds.
-
-10 tests, 10 assertions, 0 failures, 0 errors
-
-
-Nokogiri and libxml-ruby:
-
-[rails_hash_from_xml (master)]$ ruby -I$RAILS_SOURCE/activesupport/lib test/test_rexml_equality.rb 
-Testing xml_mini backends: Nokogiri LibXML
-Loaded suite test/test_rexml_equality
-Started
-....F.............F.
-Finished in 0.165816 seconds.
-
-  1) Failure:
-test_children_with_non_adjacent_comparing_LibXML_to_rexml(TestRexmlEquality) [test/test_rexml_equality.rb:151]:
-<{"root"=>
-  {"__content__"=>"\n    good\n    \n    morning\n  ",
-   "products"=>{"__content__"=>"\n      hello everyone\n    "}}}> expected but was
-<{"root"=>
-  {"__content__"=>"\n    morning\n  ",
-   "products"=>{"__content__"=>"\n      hello everyone\n    "}}}>.
-
-  2) Failure:
-test_two_lists_in_a_collection_comparing_LibXML_to_rexml(TestRexmlEquality) [test/test_rexml_equality.rb:151]:
-<{"collection"=>
-  {"list"=>
-    {"definition"=>
-      [{"word"=>"Evaporation",
-        "definition"=>
-         "Evaporation is the process of changing from a liquid to a gas, for example, water changing from a liquid into water vapor."},
-       {"word"=>"Condensation",
-        "definition"=>
-         "Condensation is the process of changing from a gas to a liquid, for example, water changing from water vapor into a liquid."}],
-     "object"=>[{"id"=>"123"}, {"id"=>"456"}]}}}> expected but was
-<{"collection"=>
-  {"list"=>
-    {"object"=>
-      [{"id"=>"123"},
-       {"id"=>"456"},
-       {"word"=>"Evaporation",
-        "definition"=>
-         "Evaporation is the process of changing from a liquid to a gas, for example, water changing from a liquid into water vapor."},
-       {"word"=>"Condensation",
-        "definition"=>
-         "Condensation is the process of changing from a gas to a liquid, for example, water changing from water vapor into a liquid."}]}}}>.
-
-20 tests, 20 assertions, 2 failures, 0 errors
-[rails_hash_from_xml (master)]$
+    You're using libxml2 version 2.6.16 which is over 4 years old and has
+    plenty of bugs.  We suggest that for maximum HTML/XML parsing pleasure, you
+    upgrade your version of libxml2 and re-install nokogiri.
